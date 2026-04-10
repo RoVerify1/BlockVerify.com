@@ -3,339 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RoboPrompt - Standalone</title>
-    <meta name="description" content="Your intelligent AI assistant for Roblox development.">
+    <title>RoboPrompt AI</title>
     
-    <!-- Fonts -->
+    <!-- Modern Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-
-    <!-- Vue.js (Lightweight Framework via CDN - No Build Step Needed) -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Vue 3 -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Marked for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
         :root {
-            --bg-color: #0f0f11;
-            --sidebar-bg: #18181b;
-            --input-bg: #27272a;
+            --bg-gradient: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
             --text-main: #ffffff;
-            --text-muted: #a1a1aa;
-            --accent: #6366f1; /* Indigo */
-            --accent-hover: #4f46e5;
-            --border: #3f3f46;
-            --code-bg: #1e1e20;
+            --text-muted: #94a3b8;
+            --user-bubble: #6366f1;
+            --ai-bubble: rgba(30, 41, 59, 0.7);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
             color: var(--text-main);
             height: 100vh;
-            display: flex;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
         }
 
-        /* Layout */
-        .app-container {
-            display: flex;
+        #app {
             width: 100%;
+            max-width: 900px;
             height: 100%;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 260px;
-            background-color: var(--sidebar-bg);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 1rem;
-            transition: transform 0.3s ease;
-        }
-
-        .logo-area {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .logo-icon {
-            width: 24px;
-            height: 24px;
-            background: var(--accent);
-            border-radius: 6px;
-        }
-
-        .nav-item {
-            padding: 0.75rem 1rem;
-            color: var(--text-muted);
-            text-decoration: none;
-            border-radius: 6px;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .nav-item:hover, .nav-item.active {
-            background-color: var(--input-bg);
-            color: var(--text-main);
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
             display: flex;
             flex-direction: column;
             position: relative;
         }
 
-        .chat-area {
+        /* --- Chat Area --- */
+        .chat-container {
             flex: 1;
             overflow-y: auto;
-            padding: 2rem;
+            padding: 2rem 1.5rem;
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
+            scroll-behavior: smooth;
         }
 
-        .message {
-            max-width: 800px;
-            margin: 0 auto;
+        /* Scrollbar Styling */
+        .chat-container::-webkit-scrollbar { width: 6px; }
+        .chat-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        /* Messages */
+        .message-row {
+            display: flex;
             width: 100%;
-            line-height: 1.6;
+            animation: fadeIn 0.4s ease-out;
         }
 
-        .message.user {
-            text-align: right;
-        }
+        .message-row.user { justify-content: flex-end; }
+        .message-row.ai { justify-content: flex-start; }
 
-        .message-bubble {
-            display: inline-block;
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
+        .bubble {
+            max-width: 85%;
+            padding: 1rem 1.25rem;
+            border-radius: 24px;
             font-size: 0.95rem;
+            line-height: 1.6;
+            position: relative;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
-        .message.ai .message-bubble {
-            background-color: var(--sidebar-bg);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            border-top-left-radius: 2px;
-        }
-
-        .message.user .message-bubble {
-            background-color: var(--accent);
+        .user .bubble {
+            background: var(--user-bubble);
             color: white;
-            border-top-right-radius: 2px;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 20px var(--accent-glow);
         }
 
-        /* Code Blocks */
-        pre {
-            background-color: var(--code-bg);
-            padding: 1rem;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin-top: 0.5rem;
-            border: 1px solid var(--border);
+        .ai .bubble {
+            background: var(--ai-bubble);
+            border: 1px solid var(--glass-border);
+            color: #e2e8f0;
+            border-bottom-left-radius: 4px;
         }
-        code {
+
+        /* Markdown Styles inside Bubble */
+        .bubble pre {
+            background: #0d1117;
+            padding: 1rem;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 0.8rem 0;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .bubble code {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.85rem;
-            color: #e2e8f0;
+            color: #a5b4fc;
         }
+        .bubble p { margin-bottom: 0.5rem; }
+        .bubble p:last-child { margin-bottom: 0; }
+        .bubble strong { color: #fff; font-weight: 600; }
 
-        /* Input Area */
-        .input-area {
+        /* --- Input Area --- */
+        .input-wrapper {
             padding: 1.5rem;
-            background-color: var(--bg-color);
-            border-top: 1px solid var(--border);
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            z-index: 10;
         }
 
-        .input-container {
-            max-width: 800px;
-            margin: 0 auto;
-            position: relative;
+        .input-box {
+            width: 100%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 0.5rem 0.5rem 0.5rem 1.5rem;
             display: flex;
+            align-items: center;
             gap: 10px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .input-box:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 8px 32px var(--accent-glow);
+            transform: translateY(-2px);
         }
 
         textarea {
-            width: 100%;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 1rem;
-            border-radius: 12px;
-            resize: none;
-            height: 60px;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.95rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        textarea:focus {
-            border-color: var(--accent);
-        }
-
-        button.send-btn {
-            background-color: var(--accent);
-            color: white;
+            flex: 1;
+            background: transparent;
             border: none;
-            padding: 0 1.5rem;
-            border-radius: 12px;
+            color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1rem;
+            resize: none;
+            height: 24px;
+            max-height: 120px;
+            padding: 10px 0;
+        }
+        
+        textarea::placeholder { color: rgba(255,255,255,0.4); }
+
+        .send-btn {
+            background: var(--accent);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            color: white;
+            flex-shrink: 0;
         }
 
-        button.send-btn:hover {
-            background-color: var(--accent-hover);
-        }
+        .send-btn:hover { transform: scale(1.1); background: #4f46e5; }
+        .send-btn:disabled { background: rgba(255,255,255,0.1); cursor: not-allowed; transform: none; }
+        .send-btn svg { width: 20px; height: 20px; fill: currentColor; margin-left: 2px; }
 
-        button.send-btn:disabled {
-            background-color: var(--border);
-            cursor: not-allowed;
+        /* --- Welcome Screen (Empty State) --- */
+        .welcome-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            pointer-events: none; /* Let clicks pass through if needed, but we hide it via v-if */
+            transition: opacity 0.5s ease;
+            z-index: 0;
         }
+        
+        .welcome-screen.hidden { opacity: 0; pointer-events: none; }
+        .welcome-screen h1 { font-size: 2.5rem; margin-bottom: 0.5rem; background: linear-gradient(to right, #fff, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .welcome-screen p { color: var(--text-muted); font-size: 1.1rem; max-width: 400px; }
 
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .sidebar {
-                position: absolute;
-                height: 100%;
-                z-index: 100;
-                transform: translateX(-100%);
-            }
-            .sidebar.open {
-                transform: translateX(0);
-            }
-            .menu-toggle {
-                display: block;
-                position: absolute;
-                top: 1rem;
-                left: 1rem;
-                z-index: 50;
-                background: none;
-                border: none;
-                color: white;
-                font-size: 1.5rem;
-                cursor: pointer;
-            }
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Typing Indicator */
+        .typing-dot {
+            display: inline-block;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #94a3b8;
+            margin: 0 2px;
+            animation: bounce 1.4s infinite ease-in-out both;
         }
-        @media (min-width: 769px) {
-            .menu-toggle { display: none; }
-        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
     </style>
 </head>
 <body>
 
-<div id="app" class="app-container">
-    <!-- Mobile Menu Toggle -->
-    <button class="menu-toggle" @click="toggleSidebar">☰</button>
+<div id="app">
+    <!-- Welcome Screen (Only shows when no messages) -->
+    <div class="welcome-screen" :class="{ hidden: messages.length > 0 }">
+        <h1>RoboPrompt</h1>
+        <p>Your modern AI assistant for Roblox development.</p>
+        <p style="font-size: 0.9rem; margin-top: 1rem; opacity: 0.6;">Powered by Qwen Logic</p>
+    </div>
 
-    <!-- Sidebar -->
-    <aside class="sidebar" :class="{ open: isSidebarOpen }">
-        <div class="logo-area">
-            <div class="logo-icon"></div>
-            RoboPrompt
-        </div>
-        <nav>
-            <div class="nav-item active" @click="currentView = 'chat'">💬 New Chat</div>
-            <div class="nav-item" @click="currentView = 'history'">🕒 History</div>
-            <div class="nav-item" @click="currentView = 'settings'">⚙️ Settings</div>
-        </nav>
-        <div style="margin-top: auto; font-size: 0.8rem; color: var(--text-muted);">
-            v1.0.0 Standalone
-        </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="chat-area" ref="chatContainer">
-            <!-- Welcome Message -->
-            <div v-if="messages.length === 0" class="message ai">
-                <div class="message-bubble">
-                    <h2>Welcome to RoboPrompt!</h2>
-                    <p style="color: var(--text-muted); margin-top: 10px;">
-                        I am your independent AI assistant for Roblox development.<br>
-                        Ask me for Luau scripts, anti-cheat logic, or game design ideas.
-                    </p>
-                    <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-                        <span style="background: var(--input-bg); padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;" @click="setInput('Write a server-side anti-cheat script')">🛡️ Anti-Cheat Script</span>
-                        <span style="background: var(--input-bg); padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;" @click="setInput('Optimize this Luau code')">⚡ Optimize Code</span>
-                        <span style="background: var(--input-bg); padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;" @click="setInput('Ideas for a Tycoon game')">💡 Game Ideas</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Message Loop -->
-            <div v-for="(msg, index) in messages" :key="index" class="message" :class="msg.role">
-                <div class="message-bubble">
-                    <div v-if="msg.type === 'text'" v-html="formatText(msg.content)"></div>
-                    <div v-else-if="msg.type === 'code'">
-                        <p>{{ msg.intro }}</p>
-                        <pre><code>{{ msg.content }}</code></pre>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Loading Indicator -->
-            <div v-if="isTyping" class="message ai">
-                <div class="message-bubble" style="color: var(--text-muted); font-style: italic;">
-                    RoboPrompt is thinking...
-                </div>
+    <!-- Chat Area -->
+    <div class="chat-container" ref="chatContainer">
+        <div v-for="(msg, idx) in messages" :key="idx" class="message-row" :class="msg.role">
+            <div class="bubble">
+                <!-- Render Markdown for AI, Plain Text for User -->
+                <div v-if="msg.role === 'ai'" v-html="renderMarkdown(msg.content)"></div>
+                <div v-else>{{ msg.content }}</div>
             </div>
         </div>
 
-        <!-- Input Area -->
-        <div class="input-area">
-            <div class="input-container">
-                <textarea 
-                    v-model="userInput" 
-                    @keydown.enter.prevent="sendMessage"
-                    placeholder="Ask about Roblox scripts, optimization, or game logic..."
-                ></textarea>
-                <button class="send-btn" @click="sendMessage" :disabled="!userInput.trim() || isTyping">
-                    Send
-                </button>
+        <!-- Typing Indicator -->
+        <div v-if="isTyping" class="message-row ai">
+            <div class="bubble" style="padding: 0.8rem 1.2rem; display: flex; align-items: center; gap: 4px;">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
             </div>
         </div>
-    </main>
+    </div>
+
+    <!-- Input Area -->
+    <div class="input-wrapper">
+        <div class="input-box">
+            <textarea 
+                v-model="input" 
+                @keydown.enter.exact.prevent="sendMessage"
+                @input="autoResize"
+                placeholder="Ask for a script, exploit detection, or game idea..."
+                rows="1"
+                ref="textareaRef"
+            ></textarea>
+            <button class="send-btn" @click="sendMessage" :disabled="!input.trim() || isTyping">
+                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+        </div>
+    </div>
 </div>
 
 <script>
-    const { createApp, ref, nextTick } = Vue;
+    const { createApp, ref, nextTick, onMounted } = Vue;
 
     createApp({
         setup() {
-            const userInput = ref('');
+            const input = ref('');
             const messages = ref([]);
             const isTyping = ref(false);
-            const isSidebarOpen = ref(false);
-            const currentView = ref('chat');
             const chatContainer = ref(null);
+            const textareaRef = ref(null);
 
-            const toggleSidebar = () => {
-                isSidebarOpen.value = !isSidebarOpen.value;
-            };
+            // CONFIGURATION: Set your API Key here if you have one.
+            // For this demo, we use a simulation if no key is present to avoid CORS errors in browser.
+            const API_KEY = ""; // Example: "hf_xxxxx" for HuggingFace
+            const USE_REAL_AI = false; // Set to true if you configure the fetch below correctly
 
-            const setInput = (text) => {
-                userInput.value = text;
-            };
-
-            // Simple formatter to handle basic bolding and code blocks visually
-            const formatText = (text) => {
-                return text
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/`(.*?)`/g, '<code style="background:#333; padding:2px 4px; border-radius:3px;">$1</code>')
-                    .replace(/\n/g, '<br>');
+            const autoResize = () => {
+                const el = textareaRef.value;
+                el.style.height = 'auto';
+                el.style.height = Math.min(el.scrollHeight, 120) + 'px';
             };
 
             const scrollToBottom = async () => {
@@ -345,67 +294,73 @@
                 }
             };
 
+            const renderMarkdown = (text) => {
+                return marked.parse(text);
+            };
+
             const sendMessage = async () => {
-                const text = userInput.value.trim();
+                const text = input.value.trim();
                 if (!text) return;
 
                 // Add User Message
-                messages.value.push({ role: 'user', type: 'text', content: text });
-                userInput.value = '';
+                messages.value.push({ role: 'user', content: text });
+                input.value = '';
+                textareaRef.value.style.height = 'auto'; // Reset height
                 isTyping.value = true;
                 await scrollToBottom();
 
-                // SIMULATED AI RESPONSE (Since we removed the backend)
-                // In a real standalone app, you would fetch() your own API here.
-                setTimeout(() => {
-                    let response = { role: 'ai', type: 'text', content: '' };
-                    
-                    // Simple keyword matching to simulate intelligence for the demo
-                    const lowerText = text.toLowerCase();
-                    
-                    if (lowerText.includes('anti-cheat') || lowerText.includes('exploit')) {
-                        response.type = 'code';
-                        response.intro = "Here is a basic server-side sanity check script:";
-                        response.content = `-- ServerScriptService/SanityCheck.lua
-local Players = game:GetService("Players")
+                try {
+                    let aiResponse = "";
 
-Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function(character)
-        local humanoid = character:WaitForChild("Humanoid", 10)
-        if not humanoid then return end
-
-        -- Example: Detect impossible walkspeed
-        humanoid.Changed:Connect(function(prop)
-            if prop == "WalkSpeed" and humanoid.WalkSpeed > 50 then
-                warn(`[Security] {player.Name} attempted speed hack!`)
-                -- Kick or reset logic here
-            end
-        end)
-    end)
-end)`;
-                    } else if (lowerText.includes('optimize') || lowerText.includes('performance')) {
-                        response.content = "To optimize your Roblox game, focus on: \n1. **StreamingEnabled**: Ensure it's on in Workspace.\n2. **RunContext**: Use RunContext = 'Server' for scripts that don't need client interaction.\n3. **Loops**: Avoid infinite `while true do` loops without `task.wait()`.";
+                    if (USE_REAL_AI && API_KEY) {
+                        // --- REAL QWEN INTEGRATION (Example for HuggingFace Inference API) ---
+                        // Note: Direct browser calls to HF often fail due to CORS. 
+                        // Ideally, call your own backend which calls Qwen.
+                        const response = await fetch("https://api-inference.huggingface.co/models/Qwen/Qwen2.5-Coder-32B-Instruct", {
+                            method: "POST",
+                            headers: {
+                                "Authorization": `Bearer ${API_KEY}`,
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                inputs: `You are an expert Roblox Luau developer. Provide clean, modern, server-side secure code. User asks: ${text}`,
+                                parameters: { max_new_tokens: 500, return_full_text: false }
+                            })
+                        });
+                        const data = await response.json();
+                        aiResponse = data[0]?.generated_text || "Error generating response.";
+                    
                     } else {
-                        response.content = "That's an interesting request! Since this is a **standalone demo** without a connected AI backend, I can't generate complex new code dynamically right now. \n\nHowever, I am ready to integrate with your own API. Just connect the `sendMessage` function in the code to your endpoint!";
+                        // --- SIMULATED RESPONSE (Fallback for Demo) ---
+                        await new Promise(r => setTimeout(r, 1200)); // Fake delay
+                        
+                        const lower = text.toLowerCase();
+                        if (lower.includes('anti-cheat') || lower.includes('exploit')) {
+                            aiResponse = `Here is a modern, server-side **Anti-Cheat** module using Luau tasks:\n\n\`\`\`lua\n-- ServerScriptService/AntiCheat.lua\nlocal Players = game:GetService("Players")\nlocal RunService = game:GetService("RunService")\n\nlocal function checkSpeed(character)\n    local hrp = character:FindFirstChild("HumanoidRootPart")\n    local humanoid = character:FindFirstChild("Humanoid")\n    if not hrp or not humanoid then return end\n\n    local lastPos = hrp.Position\n    local lastTime = tick()\n\n    RunService.Heartbeat:Connect(function()\n        local now = tick()\n        local dt = now - lastTime\n        if dt > 0.1 then\n            local dist = (hrp.Position - lastPos).Magnitude\n            local speed = dist / dt\n            \n            if speed > 100 then -- Threshold\n                warn(`[Security] {character.Name} suspected speed hacking ({math.floor(speed)} studs/s)`)\n                -- character:Destroy() -- Optional: Kick\n            end\n            \n            lastPos = hrp.Position\n            lastTime = now\n        end\n    end)\nend\n\nPlayers.PlayerAdded:Connect(function(plr)\n    plr.CharacterAdded:Connect(checkSpeed)\nend)\n\`\`\`\nThis script runs entirely on the **server**, making it impossible for clients to bypass easily.`;
+                        } else if (lower.includes('tycoon') || lower.includes('game')) {
+                            aiResponse = "Great idea! For a modern Tycoon, consider using **CollectionService** to tag droppers instead of looping through children. It's much more performant.\n\nWould you like a script for an efficient money collection system?";
+                        } else {
+                            aiResponse = "I can help with that! Since this is a standalone demo without a connected backend API key, I'm simulating the response. \n\nTo get **real Qwen AI code generation**, you need to:\n1. Get a HuggingFace Token.\n2. Set `USE_REAL_AI = true` in the code.\n3. Host a small proxy server to handle CORS.\n\nBut I'm ready to code whenever you are!";
+                        }
                     }
 
-                    messages.value.push(response);
+                    messages.value.push({ role: 'ai', content: aiResponse });
+                } catch (error) {
+                    messages.value.push({ role: 'ai', content: "⚠️ Error connecting to AI service. Please check your internet or API configuration." });
+                    console.error(error);
+                } finally {
                     isTyping.value = false;
-                    scrollToBottom();
-                }, 1000); // 1 second fake delay
+                    await scrollToBottom();
+                }
             };
 
+            onMounted(() => {
+                textareaRef.value?.focus();
+            });
+
             return {
-                userInput,
-                messages,
-                isTyping,
-                isSidebarOpen,
-                currentView,
-                chatContainer,
-                toggleSidebar,
-                setInput,
-                sendMessage,
-                formatText
+                input, messages, isTyping, chatContainer, textareaRef,
+                sendMessage, autoResize, renderMarkdown
             };
         }
     }).mount('#app');
