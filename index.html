@@ -1,1 +1,415 @@
-<script>document.write(unescape("%3C%21DOCTYPE%20html%3E%0A%3Chtml%20lang%3D%22de%22%3E%0A%3Chead%3E%0A%3Cmeta%20charset%3D%22UTF-8%22%3E%0A%3Cmeta%20name%3D%22viewport%22%20content%3D%22width%3Ddevice-width%2C%20initial-scale%3D1.0%22%3E%0A%3Ctitle%3ERoboPrompt%20AI%3C/title%3E%0A%0A%3Cstyle%3E%0A%3Aroot%20%7B%0A%20%20%20%20--bg%3A%20%230a0a0b%3B%0A%20%20%20%20--panel%3A%20%23111113%3B%0A%20%20%20%20--border%3A%20%2327272a%3B%0A%20%20%20%20--accent%3A%20%23f97316%3B%0A%20%20%20%20--text%3A%20%23fff%3B%0A%7D%0A%0A*%20%7B%20box-sizing%3A%20border-box%3B%20%7D%0A%0Abody%20%7B%0A%20%20%20%20margin%3A%200%3B%0A%20%20%20%20font-family%3A%20Arial%3B%0A%20%20%20%20background%3A%20var%28--bg%29%3B%0A%20%20%20%20color%3A%20var%28--text%29%3B%0A%20%20%20%20display%3A%20flex%3B%0A%20%20%20%20height%3A%20100vh%3B%0A%7D%0A%0A/*%20Sidebar%20*/%0A.sidebar%20%7B%0A%20%20%20%20width%3A%20260px%3B%0A%20%20%20%20background%3A%20var%28--panel%29%3B%0A%20%20%20%20border-right%3A%201px%20solid%20var%28--border%29%3B%0A%20%20%20%20padding%3A%2020px%3B%0A%7D%0A%0A.logo%20%7B%0A%20%20%20%20font-weight%3A%20bold%3B%0A%20%20%20%20font-size%3A%2018px%3B%0A%20%20%20%20margin-bottom%3A%2030px%3B%0A%7D%0A%0A/*%20Chat%20*/%0A.chat%20%7B%0A%20%20%20%20flex%3A%201%3B%0A%20%20%20%20display%3A%20flex%3B%0A%20%20%20%20flex-direction%3A%20column%3B%0A%7D%0A%0A.messages%20%7B%0A%20%20%20%20flex%3A%201%3B%0A%20%20%20%20padding%3A%2030px%3B%0A%20%20%20%20overflow-y%3A%20auto%3B%0A%20%20%20%20display%3A%20flex%3B%0A%20%20%20%20flex-direction%3A%20column%3B%0A%20%20%20%20gap%3A%2020px%3B%0A%7D%0A%0A/*%20Messages%20*/%0A.msg%20%7B%0A%20%20%20%20max-width%3A%20600px%3B%0A%20%20%20%20padding%3A%2014px%3B%0A%20%20%20%20border-radius%3A%2010px%3B%0A%20%20%20%20animation%3A%20fadeUp%200.3s%20ease%3B%0A%7D%0A%0A.user%20%7B%0A%20%20%20%20background%3A%20%231c1c1f%3B%0A%20%20%20%20align-self%3A%20flex-end%3B%0A%7D%0A%0A.ai%20%7B%0A%20%20%20%20border-left%3A%203px%20solid%20var%28--accent%29%3B%0A%7D%0A%0A/*%20Animation%20*/%0A@keyframes%20fadeUp%20%7B%0A%20%20%20%20from%20%7B%20opacity%3A%200%3B%20transform%3A%20translateY%2810px%29%3B%20%7D%0A%20%20%20%20to%20%7B%20opacity%3A%201%3B%20transform%3A%20translateY%280%29%3B%20%7D%0A%7D%0A%0A/*%20Input%20*/%0A.input%20%7B%0A%20%20%20%20padding%3A%2020px%3B%0A%20%20%20%20border-top%3A%201px%20solid%20var%28--border%29%3B%0A%20%20%20%20display%3A%20flex%3B%0A%7D%0A%0Ainput%20%7B%0A%20%20%20%20flex%3A%201%3B%0A%20%20%20%20padding%3A%2012px%3B%0A%20%20%20%20background%3A%20var%28--panel%29%3B%0A%20%20%20%20border%3A%201px%20solid%20var%28--border%29%3B%0A%20%20%20%20color%3A%20white%3B%0A%7D%0A%0Abutton%20%7B%0A%20%20%20%20margin-left%3A%2010px%3B%0A%20%20%20%20padding%3A%2012px%3B%0A%20%20%20%20background%3A%20var%28--accent%29%3B%0A%20%20%20%20border%3A%20none%3B%0A%20%20%20%20cursor%3A%20pointer%3B%0A%20%20%20%20transition%3A%200.2s%3B%0A%7D%0A%0Abutton%3Ahover%20%7B%0A%20%20%20%20transform%3A%20scale%281.05%29%3B%0A%7D%0A%0A/*%20Typing%20dots%20*/%0A.typing%20%7B%0A%20%20%20%20display%3A%20flex%3B%0A%20%20%20%20gap%3A%205px%3B%0A%7D%0A%0A.dot%20%7B%0A%20%20%20%20width%3A%206px%3B%0A%20%20%20%20height%3A%206px%3B%0A%20%20%20%20background%3A%20white%3B%0A%20%20%20%20border-radius%3A%2050%25%3B%0A%20%20%20%20animation%3A%20bounce%201.4s%20infinite%3B%0A%7D%0A%0A@keyframes%20bounce%20%7B%0A%20%20%20%200%25%2C%2080%25%2C%20100%25%20%7B%20transform%3A%20scale%280%29%3B%20%7D%0A%20%20%20%2040%25%20%7B%20transform%3A%20scale%281%29%3B%20%7D%0A%7D%0A%3C/style%3E%0A%3C/head%3E%0A%0A%3Cbody%3E%0A%0A%3Cdiv%20class%3D%22sidebar%22%3E%0A%20%20%20%20%3Cdiv%20class%3D%22logo%22%3E%uD83E%uDD16%20RoboPrompt%3C/div%3E%0A%3C/div%3E%0A%0A%3Cdiv%20class%3D%22chat%22%3E%0A%20%20%20%20%3Cdiv%20class%3D%22messages%22%20id%3D%22chatBox%22%3E%0A%20%20%20%20%20%20%20%20%3Cdiv%20class%3D%22msg%20ai%22%3EHallo%21%20Was%20soll%20ich%20bauen%3F%3C/div%3E%0A%20%20%20%20%3C/div%3E%0A%0A%20%20%20%20%3Cdiv%20class%3D%22input%22%3E%0A%20%20%20%20%20%20%20%20%3Cinput%20id%3D%22input%22%20placeholder%3D%22z.B.%20Car%20Script...%22%3E%0A%20%20%20%20%20%20%20%20%3Cbutton%20onclick%3D%22send%28%29%22%3ESenden%3C/button%3E%0A%20%20%20%20%3C/div%3E%0A%3C/div%3E%0A%0A%3Cscript%3E%0Afunction%20add%28text%2C%20type%29%20%7B%0A%20%20%20%20const%20div%20%3D%20document.createElement%28%22div%22%29%3B%0A%20%20%20%20div.className%20%3D%20%22msg%20%22%20+%20type%3B%0A%20%20%20%20div.textContent%20%3D%20text%3B%0A%20%20%20%20chatBox.appendChild%28div%29%3B%0A%20%20%20%20chatBox.scrollTop%20%3D%20chatBox.scrollHeight%3B%0A%7D%0A%0Afunction%20typing%28%29%20%7B%0A%20%20%20%20const%20div%20%3D%20document.createElement%28%22div%22%29%3B%0A%20%20%20%20div.className%20%3D%20%22msg%20ai%22%3B%0A%20%20%20%20div.innerHTML%20%3D%20%60%3Cdiv%20class%3D%22typing%22%3E%0A%20%20%20%20%20%20%20%20%3Cdiv%20class%3D%22dot%22%3E%3C/div%3E%0A%20%20%20%20%20%20%20%20%3Cdiv%20class%3D%22dot%22%3E%3C/div%3E%0A%20%20%20%20%20%20%20%20%3Cdiv%20class%3D%22dot%22%3E%3C/div%3E%0A%20%20%20%20%3C/div%3E%60%3B%0A%20%20%20%20chatBox.appendChild%28div%29%3B%0A%20%20%20%20return%20div%3B%0A%7D%0A%0Afunction%20send%28%29%20%7B%0A%20%20%20%20const%20input%20%3D%20document.getElementById%28%22input%22%29%3B%0A%20%20%20%20if%20%28%21input.value%29%20return%3B%0A%0A%20%20%20%20add%28input.value%2C%20%22user%22%29%3B%0A%0A%20%20%20%20const%20t%20%3D%20typing%28%29%3B%0A%0A%20%20%20%20setTimeout%28%28%29%20%3D%3E%20%7B%0A%20%20%20%20%20%20%20%20t.remove%28%29%3B%0A%20%20%20%20%20%20%20%20add%28%22Hier%20ist%20dein%20Script%20%uD83D%uDE80%22%2C%20%22ai%22%29%3B%0A%20%20%20%20%7D%2C%201200%29%3B%0A%0A%20%20%20%20input.value%20%3D%20%22%22%3B%0A%7D%0A%3C/script%3E%0A%0A%3C/body%3E%0A%3C/html%3E"));</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RoboPrompt - Standalone</title>
+    <meta name="description" content="Your intelligent AI assistant for Roblox development.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Vue.js (Lightweight Framework via CDN - No Build Step Needed) -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #0f0f11;
+            --sidebar-bg: #18181b;
+            --input-bg: #27272a;
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
+            --accent: #6366f1; /* Indigo */
+            --accent-hover: #4f46e5;
+            --border: #3f3f46;
+            --code-bg: #1e1e20;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-area {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--accent);
+            border-radius: 6px;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--input-bg);
+            color: var(--text-main);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .message {
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            line-height: 1.6;
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+        }
+
+        .message.ai .message-bubble {
+            background-color: var(--sidebar-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-top-left-radius: 2px;
+        }
+
+        .message.user .message-bubble {
+            background-color: var(--accent);
+            color: white;
+            border-top-right-radius: 2px;
+        }
+
+        /* Code Blocks */
+        pre {
+            background-color: var(--code-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-top: 0.5rem;
+            border: 1px solid var(--border);
+        }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #e2e8f0;
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 1.5rem;
+            background-color: var(--bg-color);
+            border-top: 1px solid var(--border);
+        }
+
+        .input-container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            gap: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 1rem;
+            border-radius: 12px;
+            resize: none;
+            height: 60px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            border-color: var(--accent);
+        }
+
+        button.send-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 0 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        button.send-btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        button.send-btn:disabled {
+            background-color: var(--border);
+            cursor: not-allowed;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                height: 100%;
+                z-index: 100;
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .menu-toggle {
+                display: block;
+                position: absolute;
+                top: 1rem;
+                left: 1rem;
+                z-index: 50;
+                background: none;
+                border: none;
+                color: white;
+                font-size: 1.5rem;
+                cursor: pointer;
+            }
+        }
+        @media (min-width: 769px) {
+            .menu-toggle { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" class="app-container">
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" @click="toggleSidebar">☰</button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" :class="{ open: isSidebarOpen }">
+        <div class="logo-area">
+            <div class="logo-icon"></div>
+            RoboPrompt
+        </div>
+        <nav>
+            <div class="nav-item active" @click="currentView = 'chat'">💬 New Chat</div>
+            <div class="nav-item" @click="currentView = 'history'">🕒 History</div>
+            <div class="nav-item" @click="currentView = 'settings'">⚙️ Settings</div>
+        </nav>
+        <div style="margin-top: auto; font-size: 0.8rem; color: var(--text-muted);">
+            v1.0.0 Standalone
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="chat-area" ref="chatContainer">
+            <!-- Welcome Message -->
+            <div v-if="messages.length === 0" class="message ai">
+                <div class="message-bubble">
+                    <h2>Welcome to RoboPrompt!</h2>
+                    <p style="color: var(--text-muted); margin-top: 10px;">
+                        I am your independent AI assistant for Roblox development.<br>
+                        Ask me for Luau scripts, anti-cheat logic, or game design ideas.
+                    </p>
+                    <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <span style="background: var(--input-bg); padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;" @click="setInput('Write a server-side anti-cheat script')">🛡️ Anti-Cheat Script</span>
+                        <span style="background: var(--input-bg); padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;" @click="setInput('Optimize this Luau code')">⚡ Optimize Code</span>
+                        <span style="background: var(--input-bg); padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;" @click="setInput('Ideas for a Tycoon game')">💡 Game Ideas</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Loop -->
+            <div v-for="(msg, index) in messages" :key="index" class="message" :class="msg.role">
+                <div class="message-bubble">
+                    <div v-if="msg.type === 'text'" v-html="formatText(msg.content)"></div>
+                    <div v-else-if="msg.type === 'code'">
+                        <p>{{ msg.intro }}</p>
+                        <pre><code>{{ msg.content }}</code></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loading Indicator -->
+            <div v-if="isTyping" class="message ai">
+                <div class="message-bubble" style="color: var(--text-muted); font-style: italic;">
+                    RoboPrompt is thinking...
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+            <div class="input-container">
+                <textarea 
+                    v-model="userInput" 
+                    @keydown.enter.prevent="sendMessage"
+                    placeholder="Ask about Roblox scripts, optimization, or game logic..."
+                ></textarea>
+                <button class="send-btn" @click="sendMessage" :disabled="!userInput.trim() || isTyping">
+                    Send
+                </button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const { createApp, ref, nextTick } = Vue;
+
+    createApp({
+        setup() {
+            const userInput = ref('');
+            const messages = ref([]);
+            const isTyping = ref(false);
+            const isSidebarOpen = ref(false);
+            const currentView = ref('chat');
+            const chatContainer = ref(null);
+
+            const toggleSidebar = () => {
+                isSidebarOpen.value = !isSidebarOpen.value;
+            };
+
+            const setInput = (text) => {
+                userInput.value = text;
+            };
+
+            // Simple formatter to handle basic bolding and code blocks visually
+            const formatText = (text) => {
+                return text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/`(.*?)`/g, '<code style="background:#333; padding:2px 4px; border-radius:3px;">$1</code>')
+                    .replace(/\n/g, '<br>');
+            };
+
+            const scrollToBottom = async () => {
+                await nextTick();
+                if (chatContainer.value) {
+                    chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+                }
+            };
+
+            const sendMessage = async () => {
+                const text = userInput.value.trim();
+                if (!text) return;
+
+                // Add User Message
+                messages.value.push({ role: 'user', type: 'text', content: text });
+                userInput.value = '';
+                isTyping.value = true;
+                await scrollToBottom();
+
+                // SIMULATED AI RESPONSE (Since we removed the backend)
+                // In a real standalone app, you would fetch() your own API here.
+                setTimeout(() => {
+                    let response = { role: 'ai', type: 'text', content: '' };
+                    
+                    // Simple keyword matching to simulate intelligence for the demo
+                    const lowerText = text.toLowerCase();
+                    
+                    if (lowerText.includes('anti-cheat') || lowerText.includes('exploit')) {
+                        response.type = 'code';
+                        response.intro = "Here is a basic server-side sanity check script:";
+                        response.content = `-- ServerScriptService/SanityCheck.lua
+local Players = game:GetService("Players")
+
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(character)
+        local humanoid = character:WaitForChild("Humanoid", 10)
+        if not humanoid then return end
+
+        -- Example: Detect impossible walkspeed
+        humanoid.Changed:Connect(function(prop)
+            if prop == "WalkSpeed" and humanoid.WalkSpeed > 50 then
+                warn(`[Security] {player.Name} attempted speed hack!`)
+                -- Kick or reset logic here
+            end
+        end)
+    end)
+end)`;
+                    } else if (lowerText.includes('optimize') || lowerText.includes('performance')) {
+                        response.content = "To optimize your Roblox game, focus on: \n1. **StreamingEnabled**: Ensure it's on in Workspace.\n2. **RunContext**: Use RunContext = 'Server' for scripts that don't need client interaction.\n3. **Loops**: Avoid infinite `while true do` loops without `task.wait()`.";
+                    } else {
+                        response.content = "That's an interesting request! Since this is a **standalone demo** without a connected AI backend, I can't generate complex new code dynamically right now. \n\nHowever, I am ready to integrate with your own API. Just connect the `sendMessage` function in the code to your endpoint!";
+                    }
+
+                    messages.value.push(response);
+                    isTyping.value = false;
+                    scrollToBottom();
+                }, 1000); // 1 second fake delay
+            };
+
+            return {
+                userInput,
+                messages,
+                isTyping,
+                isSidebarOpen,
+                currentView,
+                chatContainer,
+                toggleSidebar,
+                setInput,
+                sendMessage,
+                formatText
+            };
+        }
+    }).mount('#app');
+</script>
+
+</body>
+</html>
