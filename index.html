@@ -1,211 +1,69 @@
 <!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox AI Script Architect</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Eigene Animationen definieren */
-        @keyframes ripple {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-
-        .ripple {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: scale(0);
-            animation: ripple 0.6s linear;
-            pointer-events: none;
-        }
-
-        /* Syntax Highlighting Simualtion */
-        .code-block {
-            font-family: 'Fira Code', monospace;
-            background: #0d1117;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            color: #c9d1d9;
-            position: relative;
-            margin-top: 0.5rem;
-        }
-        
-        /* Scrollbar Styling (Webkit) */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1e1e1e;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #444;
-            border-radius: 3px;
-        }
-    </style>
-</head>
-<body class="bg-[#1e1e1e] text-gray-200 h-screen flex flex-col overflow-hidden font-sans">
-
-    <header class="h-16 bg-[#171717] border-b border-white/10 flex items-center justify-between px-6 z-10">
-        <div class="flex items-center gap-3">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Roblox_player_icon_black.svg" class="w-7 h-7 invert" alt="Roblox Logo">
-            <h1 class="text-xl font-bold tracking-tight">Script <span class="text-[#00a2ff]">Architect</span> AI</h1>
-        </div>
-        <div class="flex items-center gap-2">
-            <span class="text-xs text-gray-500">Kostenlose Version (Qwen-72B)</span>
-            <div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center font-bold text-sm">G</div>
-        </div>
-    </header>
-
-    <div class="flex flex-1 overflow-hidden">
-
-        <aside class="w-64 bg-[#171717] p-4 flex flex-col border-r border-white/10 transition-all duration-300 ease-in-out">
-            <button onclick="createRipple(event)" class="relative overflow-hidden w-full bg-[#2c2c2c] border border-white/10 hover:bg-[#3c3c3c] text-white rounded-lg p-3 text-sm font-medium transition duration-150 flex items-center justify-center gap-2 group">
-                <span class="text-lg group-hover:scale-110 transition-transform">+</span> Neues Script
-            </button>
-            
-            <div class="mt-8 flex-1 space-y-2 overflow-y-auto pr-1">
-                <p class="text-xs text-gray-500 uppercase font-bold tracking-wider px-2">Verlauf</p>
-                <div class="p-2.5 hover:bg-white/5 rounded-lg cursor-pointer text-sm flex items-center gap-2 group transition">
-                    <span class="text-gray-600 group-hover:text-[#00a2ff]">#</span> Anti-Cheat System
-                </div>
-                <div class="p-2.5 hover:bg-white/5 rounded-lg cursor-pointer text-sm flex items-center gap-2 group transition">
-                    <span class="text-gray-600 group-hover:text-[#00a2ff]">#</span> Car Chassis V2
-                </div>
-                <div class="p-2.5 hover:bg-white/5 rounded-lg cursor-pointer text-sm flex items-center gap-2 group transition">
-                    <span class="text-gray-600 group-hover:text-[#00a2ff]">#</span> Leaderstats System
-                </div>
-            </div>
-
-            <div class="border-t border-white/10 pt-4 mt-4 text-xs text-gray-600 text-center">
-                Verbunden mit Vercel
-            </div>
-        </aside>
-
-        <main class="flex-1 flex flex-col bg-[#212121]">
-            <div id="chatMessages" class="flex-1 overflow-y-auto p-6 md:p-10 space-y-8">
-                
-                <div class="flex gap-4 items-start">
-                    <div class="w-9 h-9 rounded-full bg-purple-700 flex items-center justify-center text-sm font-bold flex-shrink-0">AI</div>
-                    <div class="flex-1 space-y-2">
-                        <p class="text-gray-300">Hallo! Ich bin dein Roblox Script Architect. Was soll ich heute für dein Spiel erstellen?</p>
-                        <p class="text-xs text-gray-600">Qwen-72B-Coder // 13:37</p>
-                    </div>
-                </div>
-
-                </div>
-
-            <footer class="p-4 md:p-6 bg-[#212121]">
-                <div class="max-w-4xl mx-auto relative flex items-center">
-                    <input type="text" id="userInput" placeholder="z.B. Erstelle ein Car Script mit A-Chassis Kompatibilität..." 
-                        class="w-full bg-[#2c2c2c] border border-white/10 text-white rounded-xl py-4 pl-6 pr-16 focus:ring-2 focus:ring-[#00a2ff] focus:border-transparent outline-none transition duration-150 text-base shadow-inner">
-                    <button onclick="sendRequest(event)" class="absolute right-3 p-3 bg-[#00a2ff] hover:bg-[#008bdb] text-white rounded-lg transition duration-150 flex items-center justify-center group overflow-hidden relative">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 group-hover:translate-x-1 transition-transform">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-                        </svg>
-                    </button>
-                </div>
-                <p class="text-center text-xs text-gray-700 mt-3">Die KI kann Fehler machen. Überprüfe den Code, bevor du ihn in Roblox Studio nutzt.</p>
-            </footer>
-        </main>
-    </div>
-
-    <script>
-        // 1. Die Klick-Animation (Ripple Effect)
-        function createRipple(event) {
-            const button = event.currentTarget;
-            const circle = document.createElement("span");
-            const diameter = Math.max(button.clientWidth, button.clientHeight);
-            const radius = diameter / 2;
-
-            circle.style.width = circle.style.height = `${diameter}px`;
-            circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
-            circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
-            circle.classList.add("ripple");
-
-            // Entferne alte Ripples
-            const ripple = button.getElementsByClassName("ripple")[0];
-            if (ripple) {
-                ripple.remove();
-            }
-
-            button.appendChild(circle);
-        }
-
-        // 2. Die Chat-Logik (Simulation)
-        async function sendRequest(event) {
-            // Ripple Animation auf dem Senden-Button
-            createRipple(event);
-
-            const input = document.getElementById('userInput');
-            const chatBox = document.getElementById('chatMessages');
-            const userText = input.value.trim();
-
-            if(!userText) return;
-
-            // User Nachricht hinzufügen (mit Animation)
-            chatBox.innerHTML += `
-                <div class="flex gap-4 items-start justify-end opacity-0 transform translate-y-4 transition-all duration-300 ease-out" id="lastUserMsg">
-                    <div class="bg-[#2c2c2c] p-4 rounded-xl rounded-br-none text-gray-100 max-w-[80%] border border-white/5">
-                        ${userText}
-                    </div>
-                </div>
-            `;
-            
-            // Animation triggern
-            setTimeout(() => document.getElementById('lastUserMsg').classList.remove('opacity-0', 'translate-y-4'), 50);
-
-            input.value = ""; // Input leeren
-            scrollToBottom();
-
-            // KI "Denken" Status
-            const thinkingId = 'thinking_' + Date.now();
-            chatBox.innerHTML += `
-                <div class="flex gap-4 items-start" id="${thinkingId}">
-                    <div class="w-9 h-9 rounded-full bg-purple-700 flex items-center justify-center text-sm font-bold flex-shrink-0">AI</div>
-                    <div class="flex-1 space-y-2">
-                        <p class="text-gray-500 italic">Generiere Script...</p>
-                    </div>
-                </div>
-            `;
-            scrollToBottom();
-
-            // --- HIER WÜRDE DEINE VERCEL API ANFRAGE KOMMEN ---
-            // Wir simulieren eine Antwort nach 2.5 Sekunden
-            await new Promise(resolve => setTimeout(resolve, 2500));
-            // ---------------------------------------------------
-
-            // Simulation eines Verbindungscodes
-            const connectCode = Math.floor(1000 + Math.random() * 9000);
-            
-            // "Denken" entfernen und echte Antwort anzeigen
-            document.getElementById(thinkingId).remove();
-            
-            chatBox.innerHTML += `
-                <div class="flex gap-4 items-start opacity-0 transform translate-y-4 transition-all duration-300 ease-out" id="lastAiMsg">
-                    <div class="w-9 h-9 rounded-full bg-purple-700 flex items-center justify-center text-sm font-bold flex-shrink-0">AI</div>
-                    <div class="flex-1 space-y-3">
-                        <p class="text-gray-300">Script erfolgreich generiert! Nutze diesen Code im Roblox Plugin zum Importieren:</p>
-                        <div class="bg-black/30 border border-[#00a2ff]/30 p-5 rounded-lg text-center">
-                            <span class="text-4xl font-mono font-bold tracking-widest text-[#00a2ff]">${connectCode}</span>
-                        </div>
-                        <p class="text-xs text-gray-600">Modell: Qwen-72B-Coder // Dauer: 2.1s</p>
-                    </div>
-                </div>
-            `;
-            
-            // Animation triggern
-            setTimeout(() => document.getElementById('lastAiMsg').classList.remove('opacity-0', 'translate-y-4'), 50);
-            scrollToBottom();
-        }
-
-        function scrollToBottom() {
-            const chatBox = document.getElementById('chatMessages');
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-    </script>
-</body>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <link href="https://media.base44.com/images/public/69d9446ae333e4b766dec67d/609e30c0f_logo.png" rel="icon" type="image/svg+xml"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <link href="/manifest.json" rel="manifest"/>
+  <title>
+   RoboPrompt
+  </title>
+  <script crossorigin="" src="/assets/index-BhKLsuvz.js" type="module">
+  </script>
+  <link crossorigin="" href="/assets/index-Dx9VMXja.css" rel="stylesheet"/>
+  <script type="module">
+   if (window.self === window.top) {
+  let lastPath = "";
+  function getPageNameFromPath(path) {
+    const segments = path.split("/").filter(Boolean);
+    return segments[0] || null;
+  }
+  function trackPageView() {
+    const path = window.location.pathname;
+    if (path === lastPath) return;
+    lastPath = path;
+    const pageName = getPageNameFromPath(path) || "home";
+    const appId = "69d9446ae333e4b766dec67d";
+    if (!appId) return;
+    fetch(`/app-logs/${appId}/log-user-in-app/${pageName}`, {
+      method: "POST",
+    }).catch(() => {});
+  }
+  const originalPushState = history.pushState.bind(history);
+  history.pushState = function (...args) {
+    originalPushState(...args);
+    trackPageView();
+  };
+  const originalReplaceState = history.replaceState.bind(history);
+  history.replaceState = function (...args) {
+    originalReplaceState(...args);
+    trackPageView();
+  };
+  window.addEventListener("popstate", trackPageView);
+  trackPageView();
+}
+  </script>
+  <meta content="Your intelligent AI assistant for Roblox development, script optimization, and creative brainstorming." name="description"/>
+  <meta content="RoboPrompt" property="og:title"/>
+  <meta content="Your intelligent AI assistant for Roblox development, script optimization, and creative brainstorming." property="og:description"/>
+  <meta content="https://media.base44.com/images/public/69d9446ae333e4b766dec67d/609e30c0f_logo.png/v1/fill/w_1200,h_630/609e30c0f_logo.png" property="og:image"/>
+  <meta content="https://robo-prompt-labs.base44.app" property="og:url"/>
+  <meta content="website" property="og:type"/>
+  <meta content="RoboPrompt" property="og:site_name"/>
+  <meta content="RoboPrompt" name="twitter:title"/>
+  <meta content="Your intelligent AI assistant for Roblox development, script optimization, and creative brainstorming." name="twitter:description"/>
+  <meta content="https://media.base44.com/images/public/69d9446ae333e4b766dec67d/609e30c0f_logo.png/v1/fill/w_1200,h_630/609e30c0f_logo.png" name="twitter:image"/>
+  <meta content="summary_large_image" name="twitter:card"/>
+  <meta content="https://robo-prompt-labs.base44.app" name="twitter:url"/>
+  <meta content="yes" name="mobile-web-app-capable"/>
+  <meta content="black" name="apple-mobile-web-app-status-bar-style"/>
+  <meta content="RoboPrompt" name="apple-mobile-web-app-title"/>
+  <link href="https://robo-prompt-labs.base44.app" rel="canonical"/>
+  <script async="true" data-app-id="69d9446ae333e4b766dec67d" data-platform-url="https://app.base44.com" src="/static/js/badge.js">
+  </script>
+ </head>
+ <body>
+  <div id="root">
+  </div>
+ </body>
 </html>
