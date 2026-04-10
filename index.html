@@ -1,53 +1,258 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body { display: flex; height: 100vh; margin: 0; font-family: sans-serif; background: #1e1e1e; color: white; }
-        /* Linke Seite: Chat-Liste */
-        .sidebar { width: 250px; background: #2c2c2c; border-right: 1px solid #444; padding: 10px; }
-        /* Mitte: Chat-Fenster */
-        .chat-area { flex: 1; display: flex; flex-direction: column; }
-        .messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .input-area { padding: 20px; background: #2c2c2c; display: flex; gap: 10px; }
-        input { flex: 1; padding: 12px; border-radius: 5px; border: 1px solid #444; background: #3c3c3c; color: white; }
-        button { padding: 10px 20px; background: #00a2ff; border: none; color: white; border-radius: 5px; cursor: pointer; }
-        .code-display { font-family: monospace; background: #000; padding: 5px; color: #0f0; border-radius: 3px; }
-    </style>
-</head>
-<body>
-    <div class="sidebar">
-        <h3>Verlauf</h3>
-        <div style="color: #888; font-size: 0.8em;">Keine Chats vorhanden</div>
-    </div>
-    <div class="chat-area">
-        <div class="messages" id="chatBox">
-            <div>KI: Hallo! Was soll ich heute für dein Roblox-Spiel erstellen?</div>
-        </div>
-        <div class="input-area">
-            <input type="text" id="userInput" placeholder="z.B. Mach mir ein Car Script...">
-            <button onclick="sendRequest()">Senden</button>
-        </div>
-    </div>
+    * { box-sizing: border-box; outline: none; }
+    
+    body { 
+        margin: 0; 
+        font-family: 'Inter', sans-serif; 
+        background: var(--bg-dark); 
+        color: var(--text-main); 
+        height: 100vh; 
+        display: flex; 
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+    }
 
-    <script>
-        async function sendRequest() {
-            const input = document.getElementById('userInput');
-            const chatBox = document.getElementById('chatBox');
-            if(!input.value) return;
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 
-            // Nachricht anzeigen
-            chatBox.innerHTML += `<div>Du: ${input.value}</div>`;
-            
-            // Hier würdest du dein Vercel-Backend anrufen
-            // Für den Test generieren wir eine zufällige ID
-            const connectCode = Math.floor(1000 + Math.random() * 9000);
-            
-            chatBox.innerHTML += `<div>KI: Generiere Script...</div>`;
-            setTimeout(() => {
-                chatBox.innerHTML += `<div>KI: Fertig! Nutze Code <b class="code-display">${connectCode}</b> im Roblox Plugin.</div>`;
-                input.value = "";
-            }, 1500);
-        }
-    </script>
-</body>
-</html>
+    /* Sidebar */
+    .sidebar { 
+        width: 260px; 
+        background: var(--bg-panel); 
+        border-right: 1px solid var(--border); 
+        display: flex; 
+        flex-direction: column; 
+        padding: 24px;
+        z-index: 10;
+    }
+
+    .brand {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 40px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        letter-spacing: -0.02em;
+    }
+    
+    .brand-icon {
+        width: 24px;
+        height: 24px;
+        background: linear-gradient(135deg, var(--primary), #fb923c);
+        border-radius: 6px;
+    }
+
+    .nav-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 16px;
+        font-weight: 600;
+    }
+
+    .history-list {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .history-item {
+        padding: 10px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        transition: all 0.2s;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        border: 1px solid transparent;
+    }
+
+    .history-item:hover {
+        background: var(--bg-element);
+        color: white;
+    }
+
+    .history-item.active {
+        background: var(--bg-element);
+        color: white;
+        border-color: var(--border);
+    }
+
+    /* Main Area */
+    .main-content { 
+        flex: 1; 
+        display: flex; 
+        flex-direction: column; 
+        position: relative;
+        background: radial-gradient(circle at 50% 0%, #1a1a1d 0%, var(--bg-dark) 50%);
+    }
+
+    .chat-container { 
+        flex: 1; 
+        padding: 40px 20px; 
+        overflow-y: auto; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center;
+        gap: 24px; 
+    }
+
+    .message-wrapper {
+        width: 100%;
+        max-width: 800px;
+        animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .message {
+        padding: 16px 24px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        position: relative;
+    }
+
+    .message.user {
+        background: var(--bg-element);
+        border: 1px solid var(--border);
+        color: var(--text-main);
+        align-self: flex-end;
+        border-bottom-right-radius: 2px;
+    }
+
+    .message.ai {
+        background: transparent;
+        padding: 0;
+        align-self: flex-start;
+        width: 100%;
+    }
+
+    .ai-avatar {
+        width: 32px;
+        height: 32px;
+        background: var(--primary);
+        border-radius: 6px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+        color: white;
+    }
+
+    .code-block {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 12px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.85rem;
+        color: var(--success);
+        position: relative;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .code-label {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: var(--border);
+        color: var(--text-muted);
+        font-size: 0.65rem;
+        padding: 4px 8px;
+        border-bottom-left-radius: 6px;
+        border-top-right-radius: 6px;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+
+    /* Input Area */
+    .input-zone {
+        padding: 30px;
+        background: linear-gradient(to top, var(--bg-dark) 60%, transparent);
+        display: flex;
+        justify-content: center;
+    }
+
+    .input-box {
+        width: 100%;
+        max-width: 800px;
+        background: var(--bg-panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 6px;
+        display: flex;
+        align-items: center;
+        box-shadow: var(--shadow);
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-box:focus-within {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.1);
+    }
+
+    input { 
+        flex: 1; 
+        padding: 16px 20px; 
+        border: none; 
+        background: transparent; 
+        color: white; 
+        font-size: 1rem;
+        font-family: 'Inter', sans-serif;
+    }
+
+    input::placeholder { color: #52525b; }
+
+    button { 
+        padding: 12px 24px; 
+        background: var(--primary); 
+        border: none; 
+        color: white; 
+        border-radius: 10px; 
+        cursor: pointer; 
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    button:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+
+    /* Loading Animation */
+    .typing-indicator {
+        display: flex;
+        gap: 4px;
+        padding: 12px 0;
+    }
+    .dot {
+        width: 6px;
+        height: 6px;
+        background: var(--text-muted);
+        border-radius: 50%;
+        animation: bounce 1.4s infinite ease-in-out both;
+    }
+    .dot:nth-child(1) { animation-delay: -0.32s; }
+    .dot:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes bounce {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
+    }
+
+</style>
