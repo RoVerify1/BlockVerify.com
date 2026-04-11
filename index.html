@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Qwen AI Roblox Generator</title>
     <style>
-        :root { --bg: #0d1117; --panel: #161b22; --text: #c9d1d9; --accent: #238636; }
+        :root { --bg: #0d1117; --panel: #161b22; --text: #c9d1d9; --accent: #238636; --error: #da3633; }
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; height: 100vh; }
         .container { width: 100%; max-width: 700px; display: flex; flex-direction: column; background: var(--panel); border: 1px solid #30363d; border-radius: 6px; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .header { padding: 16px; border-bottom: 1px solid #30363d; font-weight: 600; font-size: 1.2em; display: flex; align-items: center; gap: 10px; }
@@ -13,6 +13,7 @@
         .message { padding: 12px 16px; border-radius: 6px; max-width: 85%; line-height: 1.5; word-wrap: break-word; font-size: 0.95em; }
         .user { align-self: flex-end; background: #1f6feb; color: white; border-bottom-right-radius: 2px; }
         .ai { align-self: flex-start; background: #21262d; border: 1px solid #30363d; border-bottom-left-radius: 2px; }
+        .error-msg { align-self: center; background: rgba(218, 54, 51, 0.15); border: 1px solid var(--error); color: #ff7b72; padding: 10px; border-radius: 6px; width: 90%; text-align: center; }
         .code-box { background: #0d1117; border: 1px solid #30363d; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 0.85em; color: #58a6ff; margin-top: 8px; cursor: pointer; position: relative; }
         .code-box:hover { border-color: #58a6ff; }
         .copy-hint { font-size: 0.7em; color: #8b949e; text-align: right; margin-top: 4px; }
@@ -29,7 +30,7 @@
     <div class="container">
         <div class="header">🤖 Qwen Roblox Script Generator</div>
         <div class="chat-area" id="chat">
-            <div class="message ai">Hallo! Beschreibe dein Roblox Script (z.B. "Ein Anti-Cheat System" oder "Ein Admin Panel"). Ich generiere den Code und lade ihn auf GitHub.</div>
+            <div class="message ai">Hallo! Beschreibe dein Roblox Script. Ich generiere den Code und lade ihn auf GitHub.</div>
         </div>
         <div class="input-area">
             <input type="text" id="userInput" placeholder="Was soll das Script machen?" onkeypress="if(event.key==='Enter') sendMessage()">
@@ -53,7 +54,7 @@
             
             // Loading Status
             const loadingId = 'loading-' + Date.now();
-            chat.innerHTML += `<div id="${loadingId}" class="message ai loading">Qwen denkt nach und bereitet GitHub Commit vor...</div>`;
+            chat.innerHTML += `<div id="${loadingId}" class="message ai loading">Qwen denkt nach und verbindet mit GitHub...</div>`;
             chat.scrollTop = chat.scrollHeight;
             
             btn.disabled = true;
@@ -65,16 +66,25 @@
                     body: JSON.stringify({ prompt: text })
                 });
 
-                const data = await response.json();
+                // WICHTIG: Erst den Text holen, dann parsen
+                const rawText = await response.text(); 
+                let data;
+                
+                try {
+                    data = JSON.parse(rawText);
+                } catch (e) {
+                    throw new Error("Server antwortete mit ungültigem JSON: " + rawText.substring(0, 100));
+                }
 
                 // Loading entfernen
-                document.getElementById(loadingId).remove();
+                const loadingEl = document.getElementById(loadingId);
+                if(loadingEl) loadingEl.remove();
 
                 if (data.success) {
                     chat.innerHTML += `
                         <div class="message ai">
-                            Fertig! Dein Code wurde auf GitHub gepusht.<br>
-                            Kopiere diesen Installations-Code für das Roblox Plugin:
+                            ✅ Fertig! Code wurde auf GitHub gepusht.<br><br>
+                            <strong>Installations-Code für Roblox Plugin:</strong>
                             <div class="code-box" onclick="navigator.clipboard.writeText('${data.code}'); alert('Kopiert!');" title="Klicken zum Kopieren">
                                 ${data.code}
                             </div>
@@ -85,11 +95,19 @@
                         </div>
                     `;
                 } else {
-                    chat.innerHTML += `<div class="message ai" style="color:#ff7b72">Fehler: ${data.error}</div>`;
+                    // Hier war der Fehler: Wir müssen data.error nutzen, nicht das ganze Objekt
+                    const errorMsg = data.error || "Unbekannter Fehler";
+                    chat.innerHTML += `<div class="error-msg">❌ Fehler: ${errorMsg}</div>`;
+                    
+                    // Zusätzliche Info für dich in der Konsole (F12 drücken im Browser)
+                    console.error("Detaillierter Fehler vom Server:", data);
                 }
             } catch (err) {
-                document.getElementById(loadingId).remove();
-                chat.innerHTML += `<div class="message ai" style="color:#ff7b72">Verbindungsfehler zum Server.</div>`;
+                const loadingEl = document.getElementById(loadingId);
+                if(loadingEl) loadingEl.remove();
+                
+                chat.innerHTML += `<div class="error-msg">❌ Verbindungsfehler: ${err.message}</div>`;
+                console.error("Netzwerkfehler:", err);
             } finally {
                 btn.disabled = false;
                 chat.scrollTop = chat.scrollHeight;
